@@ -1,0 +1,14 @@
+version: '3'
+
+env:
+  PATH: "{{.PATH}}:{{.HOME}}/go/bin"
+
+tasks:
+  migrate.up:
+    desc: "Поднять все миграции"
+    cmds:
+      - migrate -source=file:///home/pentagon/telegram_bot/db -database=postgres://postgres:1@localhost:5432/bot up
+  migrate.down:
+    desc: "опустить все миграции"
+    cmds:
+      - migrate -source=file:///home/pentagon/telegram_bot/db -database=postgres://postgres:1@localhost:5432/bot down
