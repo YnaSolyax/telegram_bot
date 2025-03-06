@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var channelID = "@testchannerll"
+var channelID = "Your_chaanel"
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -34,7 +34,7 @@ func main() {
 		bot.WithDefaultHandler(handler.Handler),
 	}
 
-	b, err := bot.New("7654041302:AAG8YAbT4XES9qofmYYKcnId6RgN0uMCxAk", opts...)
+	b, err := bot.New("token", opts...)
 	if err != nil {
 		panic(err)
 	}
