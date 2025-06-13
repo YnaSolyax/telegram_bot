@@ -18,7 +18,7 @@ func (u *StorageUser) AddUserToDB(userID int64, username string, status int) err
 		Status:   status,
 	}
 
-	u.manager.Insert(user)
+	u.manager.SetUser(user)
 
 	return nil
 }

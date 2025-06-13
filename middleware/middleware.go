@@ -27,7 +27,7 @@ func (u *User) Handler(next bot.HandlerFunc) bot.HandlerFunc {
 		username := update.Message.From.Username
 		status := 0
 
-		err := u.storage.Insert(userID, username, status)
+		err := u.storage.SetUser(userID, username, status)
 		if err != nil {
 			u.logger.Error("Error creating user", zap.Error(err), zap.Int64("user-id", userID))
 		}

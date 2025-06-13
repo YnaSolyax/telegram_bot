@@ -24,7 +24,7 @@ func Manager(manager *storage.DBManager, redisStorage *redis.RedisStorage, logge
 	}
 }
 
-func (u *StorageUser) Insert(userID int64, username string, status int) error {
+func (u *StorageUser) SetUser(userID int64, username string, status int) error {
 	u.logger.Debug("Inserting user", zap.Int64("userID", userID), zap.String("username", username))
 
 	user, err := u.GetUser(userID)
@@ -40,7 +40,7 @@ func (u *StorageUser) Insert(userID int64, username string, status int) error {
 		return errors.Wrap(err, "add user to db")
 	}
 
-	if err := u.redis.PutUser(&redis.UserRedis{
+	if err := u.redis.SetUser(&redis.UserRedis{
 		UserID:   userID,
 		Username: username,
 		Status:   status,
@@ -77,7 +77,7 @@ func (u *StorageUser) GetUser(userID int64) (*redis.UserRedis, error) {
 		return nil, nil
 	}
 
-	err = u.redis.PutUser((*redis.UserRedis)(dbUser))
+	err = u.redis.SetUser((*redis.UserRedis)(dbUser))
 	if err != nil {
 		u.logger.Error("Error saving user to Redis", zap.Int64("userID", userID), zap.Error(err))
 		return nil, err

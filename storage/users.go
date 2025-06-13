@@ -23,7 +23,7 @@ func NewDBManager(db *sql.DB) *DBManager {
 	}
 }
 
-func (m *DBManager) Insert(u *DBUser) error {
+func (m *DBManager) SetUser(u *DBUser) error {
 	if m.db == nil {
 		return errors.Errorf("database connection is nil")
 	}

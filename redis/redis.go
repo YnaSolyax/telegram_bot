@@ -40,7 +40,7 @@ func NewRedisStorage(logger *zap.Logger) *RedisStorage {
 	}
 }
 
-func (r *RedisStorage) PutUser(u *UserRedis) error {
+func (r *RedisStorage) SetUser(u *UserRedis) error {
 	key := strconv.Itoa(int(u.UserID))
 
 	userData, err := json.Marshal(u)
