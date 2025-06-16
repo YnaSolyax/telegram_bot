@@ -8,7 +8,7 @@ import (
 )
 
 type DBUser struct {
-	UserID   int64
+	Id       int64
 	Username string
 	Status   int
 }
@@ -30,7 +30,7 @@ func (m *DBManager) SetUser(u *DBUser) error {
 
 	query := `INSERT INTO users (user_id, username, status) VALUES ($1, $2, $3)`
 
-	_, err := m.db.Exec(query, u.UserID, u.Username, u.Status)
+	_, err := m.db.Exec(query, u.Id, u.Username, u.Status)
 	if err != nil {
 		return errors.Wrap(err, "err to insert user")
 	}
@@ -40,7 +40,7 @@ func (m *DBManager) SetUser(u *DBUser) error {
 func (m *DBManager) GetUser(id int64) (*DBUser, error) {
 	u := DBUser{}
 	err := m.db.QueryRow("SELECT user_id, username, status FROM users WHERE user_id = $1", id).
-		Scan(&u.UserID, &u.Username, &u.Status)
+		Scan(&u.Id, &u.Username, &u.Status)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

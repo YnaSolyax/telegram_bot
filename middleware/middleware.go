@@ -29,7 +29,10 @@ func (u *User) Handler(next bot.HandlerFunc) bot.HandlerFunc {
 
 		err := u.storage.SetUser(userID, username, status)
 		if err != nil {
-			u.logger.Error("Error creating user", zap.Error(err), zap.Int64("user-id", userID))
+			u.logger.Error("User operation failed",
+				zap.Int64("user_id", userID),
+				zap.String("username", username),
+				zap.String("error", err.Error()))
 		}
 
 		next(ctx, bot, update)

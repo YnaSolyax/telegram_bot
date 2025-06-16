@@ -14,7 +14,7 @@ import (
 var ctx = context.Background()
 
 type UserRedis struct {
-	UserID   int64
+	Id       int64
 	Username string
 	Status   int
 }
@@ -41,21 +41,21 @@ func NewRedisStorage(logger *zap.Logger) *RedisStorage {
 }
 
 func (r *RedisStorage) SetUser(u *UserRedis) error {
-	key := strconv.Itoa(int(u.UserID))
+	key := strconv.Itoa(int(u.Id))
 
 	userData, err := json.Marshal(u)
 	if err != nil {
-		r.logger.Error("Error marshaling user", zap.Int64("userID", u.UserID), zap.Error(err))
+		r.logger.Error("Error marshaling user", zap.Int64("userID", u.Id), zap.Error(err))
 		return errors.Wrap(err, "marshal struct")
 	}
 
 	err = r.client.Set(ctx, key, userData, 0).Err()
 	if err != nil {
-		r.logger.Error("Error setting user in Redis", zap.Int64("userID", u.UserID), zap.Error(err))
+		r.logger.Error("Error setting user in Redis", zap.Int64("userID", u.Id), zap.Error(err))
 		return errors.Wrap(err, "set user")
 	}
 
-	r.logger.Debug("User saved to Redis", zap.Int64("userID", u.UserID))
+	r.logger.Debug("User saved to Redis", zap.Int64("userID", u.Id))
 	return nil
 }
 

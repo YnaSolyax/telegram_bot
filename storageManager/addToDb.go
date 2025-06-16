@@ -13,7 +13,7 @@ func (u *StorageUser) AddUserToDB(userID int64, username string, status int) err
 	}
 
 	user = &storage.DBUser{
-		UserID:   userID,
+		Id:       userID,
 		Username: username,
 		Status:   status,
 	}
