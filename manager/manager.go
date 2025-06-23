@@ -7,8 +7,8 @@ import (
 	"telegram_bot/adapter"
 	"telegram_bot/commands"
 	"telegram_bot/handler"
-	"telegram_bot/inmemory"
 	"telegram_bot/middleware"
+	"telegram_bot/redis"
 	"telegram_bot/storage"
 	"telegram_bot/storageManager"
 
@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	channelID = "YOUR_CHANAL"
-	token     = "YOUR_API_TOKEN"
+	channelID = "1"
+	token     = "2"
 )
 
 func Manager() error {
@@ -41,13 +41,13 @@ func Manager() error {
 
 	newDbManager := storage.NewDBManager(db)
 
-	//redis := redis.NewRedisStorage(logger)
-	//redisAdapter := adapter.NewRedisAdapter(redis, logger)
+	redis := redis.NewRedisStorage(logger)
+	redisAdapter := adapter.NewRedisAdapter(redis, logger)
 
-	cache := inmemory.NewInmemoryStorage(logger)
-	cacheAdapter := adapter.NewCacheAdapter(cache, logger)
+	//cache := inmemory.NewInmemoryStorage(logger)
+	//cacheAdapter := adapter.NewCacheAdapter(cache, logger)
 
-	stManager := storageManager.Manager(newDbManager, cacheAdapter, logger)
+	stManager := storageManager.Manager(newDbManager, redisAdapter, logger)
 	userMiddleware := middleware.NewUser(logger, stManager)
 
 	opts := []bot.Option{
@@ -61,8 +61,9 @@ func Manager() error {
 		return errors.Wrap(err, "bot token error")
 	}
 
-	commands.NewStartBotHandler(b, channelID).Handle()
-	commands.NewBanBotHandler(b, channelID).Handle()
+	commands.NewStartBotHandler(b, logger).Handle()
+	commands.NewBanBotHandler(b, logger).Handle()
+	commands.NewUnBanHandler(b, logger).Handle()
 	b.Start(ctx)
 
 	return nil

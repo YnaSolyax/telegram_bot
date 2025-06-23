@@ -2,48 +2,67 @@ package commands
 
 import (
 	"context"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"go.uber.org/zap"
 )
 
 type banHandler struct {
 	Bot    *bot.Bot
-	ChatID string
+	logger *zap.Logger
 }
 
-func NewBanBotHandler(b *bot.Bot, chatID string) *banHandler {
+func NewBanBotHandler(b *bot.Bot, logger *zap.Logger) *banHandler {
 	return &banHandler{
 		Bot:    b,
-		ChatID: chatID,
+		logger: logger,
 	}
 }
 
-func (bb *banHandler) Handle() {
+func (bh *banHandler) Handle() {
 
 	f := func(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-		userToBan := update.Message.ReplyToMessage.From
-		userID := userToBan.ID
+		message := update.ChannelPost.ReplyToMessage.Text
+		chatdID := update.ChannelPost.ReplyToMessage.Chat.ID
 
-		if update.Message.ReplyToMessage != nil {
+		re := regexp.MustCompile(`#ID(\d+)`)
+		regText := re.FindString(message)
 
-			b.BanChatMember(ctx, &bot.BanChatMemberParams{
-				ChatID:         bb.ChatID,
-				UserID:         userID,
-				RevokeMessages: true,
-			})
-
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: bb.ChatID,
-				Text:   "Пользователь @%s забанен",
-			})
-		} else {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: bb.ChatID,
-				Text:   "Вы должны ответить на сообщение пользователя, чтобы забанить его.",
-			})
+		ok := strings.HasPrefix(regText, "#ID")
+		if !ok {
+			bh.logger.Error("hasprefix error")
+			return
 		}
+
+		strID := strings.TrimPrefix(regText, "#ID")
+		id, err := strconv.Atoi(strID)
+
+		if err != nil {
+			bh.logger.Error("Atoi error")
+			return
+		}
+
+		bh.logger.Debug("", zap.Any("text: ", strID), zap.Any("text: ", id), zap.Any("chatd_id:", update.ChannelPost.ReplyToMessage.Chat.ID))
+
+		myb, err := bh.Bot.BanChatMember(ctx, &bot.BanChatMemberParams{
+			ChatID:         chatdID,
+			UserID:         int64(id),
+			RevokeMessages: true,
+		})
+		bh.logger.Info("banned", zap.Any("id", id), zap.Any("ban?", myb), zap.Any("err?", err))
+
 	}
-	bb.Bot.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, f)
+
+	bh.Bot.RegisterHandlerMatchFunc(
+		func(update *models.Update) bool {
+			return update.ChannelPost != nil &&
+				strings.Contains(update.ChannelPost.Text, "/ban")
+		},
+		f,
+	)
 }

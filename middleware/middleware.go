@@ -23,6 +23,13 @@ func NewUser(logger *zap.Logger, storage *storageManager.StorageUser) *User {
 
 func (u *User) Handler(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, bot *bot.Bot, update *models.Update) {
+
+		if update.ChannelPost != nil {
+			u.logger.Debug("ignoring middleware")
+			next(ctx, bot, update)
+			return
+		}
+
 		userID := update.Message.From.ID
 		username := update.Message.From.Username
 		status := 0
